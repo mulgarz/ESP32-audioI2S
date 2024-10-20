@@ -18,11 +18,15 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WiFiClientSecure.h>
+
+#ifndef AUDIO_NO_SD_FS
 #include <SD.h>
 #include <SD_MMC.h>
 #include <SPIFFS.h>
 #include <FS.h>
 #include <FFat.h>
+#endif // AUDIO_NO_SD_FS
+
 #include <atomic>
 
 #if ESP_ARDUINO_VERSION_MAJOR >= 3
@@ -43,9 +47,11 @@ using namespace std;
 
 extern __attribute__((weak)) void audio_info(const char*);
 extern __attribute__((weak)) void audio_id3data(const char*); //ID3 metadata
+#ifndef AUDIO_NO_SD_FS
 extern __attribute__((weak)) void audio_id3image(File& file, const size_t pos, const size_t size); //ID3 metadata image
 extern __attribute__((weak)) void audio_oggimage(File& file, std::vector<uint32_t> v); //OGG blockpicture
 extern __attribute__((weak)) void audio_id3lyrics(File& file, const size_t pos, const size_t size); //ID3 metadata lyrics
+#endif // AUDIO_NO_SD_FS
 extern __attribute__((weak)) void audio_eof_mp3(const char*); //end of mp3 file
 extern __attribute__((weak)) void audio_showstreamtitle(const char*);
 extern __attribute__((weak)) void audio_showstation(const char*);
@@ -142,7 +148,9 @@ public:
     bool openai_speech(const String& api_key, const String& model, const String& input, const String& voice, const String& response_format, const String& speed);
     bool connecttohost(const char* host, const char* user = "", const char* pwd = "");
     bool connecttospeech(const char* speech, const char* lang);
+#ifndef AUDIO_NO_SD_FS
     bool connecttoFS(fs::FS &fs, const char* path, int32_t m_fileStartPos = -1);
+#endif // AUDIO_NO_SD_FS    
     bool setFileLoop(bool input);//TEST loop
     void setConnectionTimeout(uint16_t timeout_ms, uint16_t timeout_ms_ssl);
     bool setAudioPlayPosition(uint16_t sec);
@@ -199,7 +207,9 @@ private:
   void            setDefaults(); // free buffers and set defaults
   void            initInBuff();
   bool            httpPrint(const char* host);
+  #ifndef AUDIO_NO_SD_FS
   void            processLocalFile();
+  #endif // AUDIO_NO_SD_FS
   void            processWebStream();
   void            processWebFile();
   void            processWebStreamTS();
@@ -535,8 +545,9 @@ private:
         int number;
         int pids[4];
     } pid_array;
-
+#ifndef AUDIO_NO_SD_FS
     File                  audiofile;
+#endif // AUDIO_NO_SD_FS
 #ifndef ETHERNET_IF
     WiFiClient            client;
     WiFiClientSecure      clientsecure;
